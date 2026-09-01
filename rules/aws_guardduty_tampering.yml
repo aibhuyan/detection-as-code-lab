@@ -1,0 +1,26 @@
+title: AWS GuardDuty tampering
+id: aws_guardduty_tampering
+status: experimental
+description: >
+  Disabling or degrading GuardDuty (deleting a detector, suspending it, or
+  dropping member accounts) to reduce the chance of being caught.
+references:
+  - https://attack.mitre.org/techniques/T1562/001/
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection:
+    eventSource: guardduty.amazonaws.com
+    eventName:
+      - DeleteDetector
+      - DisassociateMembers
+      - StopMonitoringMembers
+      - UpdateDetector
+  condition: selection
+falsepositives:
+  - Security team decommissioning a detector during a planned migration
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.001

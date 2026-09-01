@@ -1,0 +1,30 @@
+title: SSH failed authentication
+id: ssh_failed_login
+status: experimental
+description: >
+  A single failed SSH authentication. Far too noisy to alert on directly
+  (users fat-finger passwords all day), so this rule is only consumed by the
+  ssh_bruteforce correlation. Kept as its own file so the match logic is
+  peer-reviewable and reusable.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: detection-lab
+date: 2024/05/01
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    program: sshd
+    event_type: authentication_failure
+  condition: selection
+fields:
+  - source_ip
+  - user
+falsepositives:
+  - Users mistyping passwords
+  - Broken automation with stale credentials
+level: informational
+tags:
+  - attack.credential_access
+  - attack.t1110.001

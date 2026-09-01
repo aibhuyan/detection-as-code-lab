@@ -1,0 +1,8 @@
+# Regression gates enforced by CI on every pull request.
+# Detections are code: a change that drops coverage or floods the analyst
+# should block the merge, the same way a failing unit test would.
+gates:
+  min_detection_rate: 0.80      # episode-level recall must stay >= 80%
+  max_event_fp_rate: 0.01       # <= 1% of benign events may trigger any alert
+  max_alerts_per_day: 50        # benign alert volume ceiling (analyst fatigue)
+  max_mttd_p90_s: 300           # 90th-percentile time-to-detect <= 5 minutes

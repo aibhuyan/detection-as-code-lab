@@ -1,0 +1,23 @@
+title: SSH brute force from single source
+id: ssh_bruteforce
+status: experimental
+description: >
+  Five or more failed SSH authentications from one source IP within two
+  minutes. Fires on the crossing event, so its timestamp is the moment the
+  attack becomes detectable — which is exactly the time-to-detect the harness
+  measures against the episode's first event.
+correlation:
+  type: event_count
+  rules:
+    - ssh_failed_login
+  group-by:
+    - source_ip
+  timespan: 2m
+  condition:
+    gte: 5
+falsepositives:
+  - Misconfigured service hammering a host after a credential rotation
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1110.001

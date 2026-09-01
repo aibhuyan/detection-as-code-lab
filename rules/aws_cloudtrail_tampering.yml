@@ -1,0 +1,26 @@
+title: AWS CloudTrail logging disabled or altered
+id: aws_cloudtrail_tampering
+status: experimental
+description: >
+  An attacker blinding the auditors: stopping, deleting, or reconfiguring a
+  CloudTrail trail to suppress their own footprints.
+references:
+  - https://attack.mitre.org/techniques/T1562/008/
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection:
+    eventSource: cloudtrail.amazonaws.com
+    eventName:
+      - StopLogging
+      - DeleteTrail
+      - UpdateTrail
+      - PutEventSelectors
+  condition: selection
+falsepositives:
+  - Planned logging changes by platform engineering (should come with a change ticket)
+level: high
+tags:
+  - attack.defense_evasion
+  - attack.t1562.008
