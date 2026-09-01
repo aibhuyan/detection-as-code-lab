@@ -76,7 +76,9 @@ gates.yml         Regression thresholds enforced by CI
 run.py            Script entry point
 ```
 
-Full pipeline walkthrough and design trade-offs: [WALKTHROUGH.md](WALKTHROUGH.md).
+The engine is pluggable and the corpus schema is fixed, so you can swap in a
+real Sigma engine or a real dataset without touching the metrics. Full pipeline
+walkthrough and design trade-offs: [WALKTHROUGH.md](WALKTHROUGH.md).
 
 ## Metrics, briefly
 
@@ -88,22 +90,3 @@ Full pipeline walkthrough and design trade-offs: [WALKTHROUGH.md](WALKTHROUGH.md
   A 0.2% FP rate can still bury an analyst at real volume, so both are reported.
 - **MTTD** — for each detected episode, earliest alert minus the episode's first
   event: attacker dwell time before detection. Reported as median and p90.
-
-## How to extend
-
-**Add a rule.** Drop a Sigma YAML file in `rules/` (or `rules/correlation/` for a
-threshold rule), add a labeled `episode` to `data/generate_sample.py` that it
-should catch plus a benign near-miss it should *not*, and run
-`uv run python run.py --gate`. The report shows the new coverage; the gate keeps
-you honest. Rule-level tests live in `tests/test_detections.py`.
-
-**Plug in a real dataset.** Keep the corpus schema (`label` / `episode` /
-`technique` / `_logsource`) and replace the JSONL with real captures — e.g.
-[OTRF Security-Datasets](https://github.com/OTRF/Security-Datasets) for
-ATT&CK-mapped host telemetry, or flaws.cloud CloudTrail. Nothing else changes.
-
-**Swap the engine.** Everything downstream depends only on the `Alert` shape, so
-you can replace the built-in evaluator with a real Sigma engine such as
-[Zircolite](https://github.com/wagga40/Zircolite) (`engine.py` sketches the
-adapter) or [Chainsaw](https://github.com/WithSecureLabs/chainsaw) for full spec
-coverage and scale — the harness and metrics stay identical.
