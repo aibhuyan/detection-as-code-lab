@@ -1,0 +1,23 @@
+title: S3 mass object access from single principal
+id: s3_mass_object_access
+status: experimental
+description: >
+  Three or more S3 object reads by one principal within a minute — the shape of
+  bulk exfiltration rather than routine access. Fires on the crossing event, so
+  its timestamp is the moment the burst becomes detectable, which is exactly the
+  time-to-detect the harness measures against the episode's first event.
+correlation:
+  type: event_count
+  rules:
+    - s3_object_access
+  group-by:
+    - userIdentity.userName
+  timespan: 1m
+  condition:
+    gte: 3
+falsepositives:
+  - Batch/analytics jobs that legitimately read many objects (tune per principal)
+level: high
+tags:
+  - attack.collection
+  - attack.t1530

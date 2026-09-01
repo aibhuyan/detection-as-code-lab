@@ -133,6 +133,12 @@ cloudtrail_events = [
        user="secops"),  # read-only, not a tampering verb
     ct(3300, "s3.amazonaws.com", "GetObject", "IAMUser", "benign",
        user="analytics"),
+    # near-miss: 2 object reads by one principal within a minute (below the
+    # gte:3 threshold -> must NOT fire the mass-access correlation)
+    ct(3000, "s3.amazonaws.com", "GetObject", "IAMUser", "benign",
+       user="reporting"),
+    ct(3030, "s3.amazonaws.com", "GetObject", "IAMUser", "benign",
+       user="reporting"),
 ]
 
 

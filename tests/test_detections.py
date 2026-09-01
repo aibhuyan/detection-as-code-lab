@@ -43,15 +43,27 @@ def test_field_modifiers():
 
 def test_baseline_detection_rate_and_precision():
     m = run_corpus()
-    assert m.detected_episodes == 5
+    assert m.detected_episodes == 6
     assert m.total_episodes == 6
+    assert m.episode_recall == 1.0     # full coverage on the sample corpus
     assert m.precision == 1.0          # no false positives when tuned
     assert m.fp_alerts == 0
 
 
-def test_known_coverage_gap_is_surfaced():
+def test_s3_exfil_is_detected():
+    # The S3 exfiltration episode is caught by the mass-object-access
+    # correlation, so it is no longer an undetected coverage gap.
     m = run_corpus()
-    assert "aws-exfil-01" in m.undetected_episodes
+    assert "aws-exfil-01" not in m.undetected_episodes
+    assert m.per_episode["aws-exfil-01"]["detected"] is True
+
+
+def test_s3_near_miss_does_not_fire():
+    # Two benign reads by one principal are below the gte:3 threshold and must
+    # not trip the correlation (keeps precision at 1.0).
+    m = run_corpus()
+    assert m.fp_alerts == 0
+    assert m.precision == 1.0
 
 
 def test_bruteforce_mttd_is_measured():
@@ -63,7 +75,8 @@ def test_bruteforce_mttd_is_measured():
 
 def test_loosening_threshold_creates_false_positives():
     def loosen(rules, corrs):
-        corrs[0]["correlation"]["condition"]["gte"] = 3
+        ssh = next(c for c in corrs if c["id"] == "ssh_bruteforce")
+        ssh["correlation"]["condition"]["gte"] = 3
 
     m = run_corpus(loosen)
     assert m.fp_alerts >= 1            # the 4-failure benign burst now fires

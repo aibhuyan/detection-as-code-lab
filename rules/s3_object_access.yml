@@ -1,0 +1,29 @@
+title: S3 object read
+id: s3_object_access
+status: experimental
+description: >
+  A single S3 GetObject. Far too noisy to alert on directly (applications read
+  objects constantly), so this rule is only consumed by the
+  s3_mass_object_access correlation. Kept as its own file so the match logic is
+  peer-reviewable and reusable.
+references:
+  - https://attack.mitre.org/techniques/T1530/
+author: detection-lab
+date: 2024/05/01
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection:
+    eventSource: s3.amazonaws.com
+    eventName: GetObject
+  condition: selection
+fields:
+  - userIdentity.userName
+  - sourceIPAddress
+falsepositives:
+  - Normal application and analytics access to objects
+level: informational
+tags:
+  - attack.collection
+  - attack.t1530
