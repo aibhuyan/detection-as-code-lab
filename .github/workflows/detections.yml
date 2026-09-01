@@ -1,0 +1,41 @@
+name: detections
+
+# Detections-as-code: every change to a rule, the corpus, or the engine is
+# backtested against the labeled set. The job fails if a change drops the
+# detection rate, raises the false-positive rate, inflates alert volume, or
+# slows time-to-detect past the thresholds in gates.yml.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Regenerate sample corpus
+        run: uv run python data/generate_sample.py
+
+      - name: Unit tests (rule-level)
+        run: uv run pytest -q
+
+      - name: Run eval harness with gates
+        run: uv run python run.py --gate
+
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: reports/
