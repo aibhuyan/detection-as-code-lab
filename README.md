@@ -15,7 +15,7 @@ change from merging if it makes detections worse.
   *episode*, false-positive *rate and volume*, and time-to-detect — not the
   naive versions that flatter the numbers.
 
-The point isn't the four rules; it's the harness and the workflow around them.
+The point isn't the handful of rules; it's the harness and the workflow around them.
 
 ## Quickstart
 
@@ -34,23 +34,24 @@ script.
 ## Sample eval report
 
 ```
-Corpus: 39 events (21 malicious / 18 benign), 6 attack episodes.
+Corpus: 41 events (21 malicious / 20 benign), 6 attack episodes.
 
 | Metric                          | Value          |
 | ------------------------------- | -------------- |
-| Detection rate (episode recall) | 83% (5/6)      |
+| Detection rate (episode recall) | 100% (6/6)     |
 | Precision                       | 100%           |
 | Event false-positive rate       | 0.00% (0 FP)   |
 | Benign alert volume             | 0.0 alerts/day |
-| MTTD median                     | 32s            |
-| MTTD p90                        | 2.0m           |
-
-Coverage gaps: aws-exfil-01  (S3 exfiltration — no rule yet)
+| MTTD median                     | 21s            |
+| MTTD p90                        | 36s            |
 ```
 
-83% detected: one attack episode (S3 exfiltration) has no rule yet, and
-the report surfaces it instead of hiding it. Closing that gap is the obvious
-next rule to write.
+100% on the sample corpus, honestly earned: the S3 exfiltration episode started
+as a visible coverage gap (`aws-exfil-01`, detection rate 83%), and the report
+surfaced it rather than hiding it. It's now closed by a mass-object-access
+correlation — a burst of object reads by one principal, not a single read — with
+a benign 2-read near-miss in the corpus proving precision holds. That
+gap-surfaced → rule-written → gate-confirmed loop is the whole point.
 
 ## Architecture
 
